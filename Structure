@@ -1,0 +1,13 @@
+template00000001/
+app/
+__init__.py
+app.py
+models/
+__init__.py
+chat_model.py
+views/
+__init__.py
+chat_view.py
+requirements.txt
+Dockerfile
+docker-compose.yml

@@ -1,0 +1,132 @@
+
+2024-06-13T09:56:09.508645
+================================ System Message ================================
+
+You will get information about a codebase that is currently on disk in the current folder.
+The user will ask you to write a script that runs the code in a specific way.
+You will answer with code blocks that include all the necessary terminal commands.
+Do not install globally. Do not use sudo.
+Do not explain the code, just give the commands.
+Do not use placeholders, use example values (like . for a folder argument) if necessary.
+
+
+================================ Human Message =================================
+
+
+        Make a unix script that
+        a) installs dependencies
+        b) runs all necessary parts of the codebase (in parallel if necessary)
+        
+Information about the codebase:
+
+```
+File: Structure
+1 template00000001/
+2 app/
+3 __init__.py
+4 app.py
+5 models/
+6 __init__.py
+7 chat_model.py
+8 views/
+9 __init__.py
+10 chat_view.py
+11 requirements.txt
+12 Dockerfile
+13 docker-compose.yml
+
+File: app/__init__.py
+1 # empty file
+
+File: app/app.py
+1 from fastapi import FastAPI
+2 from views.chat_view import chat_router
+3 
+4 app = FastAPI()
+5 
+6 app.include_router(chat_router)
+
+File: app/models/__init__.py
+1 # empty file
+
+File: app/models/chat_model.py
+1 from dataclasses import dataclass
+2 
+3 @dataclass
+4 class ChatMessage:
+5     text: str
+6     user: str
+
+File: app/views/__init__.py
+1 # empty file
+
+File: app/views/chat_view.py
+1 from fastapi import APIRouter, Response
+2 from gradio import Interface, Textbox, Button
+3 from gradio.inputs import Textbox as GradioTextbox
+4 from gradio.outputs import Textbox as GradioTextboxOutput
+5 from models.chat_model import ChatMessage
+6 
+7 router = APIRouter()
+8 
+9 interface = Interface(
+10     fn=lambda x: {"message": x, "user": "AI"},
+11     inputs=GradioTextbox(lines=5, placeholder="Type your message..."),
+12     outputs=GradioTextboxOutput(),
+13     title="Chat Interface",
+14     description="A simple chat interface"
+15 )
+16 
+17 @router.get("/chat")
+18 async def get_chat_interface():
+19     return interface.launch()
+20 
+21 @router.post("/chat")
+22 async def post_chat_message(message: str):
+23     chat_message = ChatMessage(text=message, user="User")
+24     response = interface.process([message])
+25     return {"message": response["message"], "user": "AI"}
+
+File: requirements.txt
+1 fastapi
+2 gradio
+3 dataclasses
+
+File: Dockerfile
+1 FROM python:3.9-slim
+2 
+3 WORKDIR /app
+4 
+5 COPY requirements.txt .
+6 
+7 RUN pip install -r requirements.txt
+8 
+9 COPY . .
+10 
+11 CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+File: docker-compose.yml
+1 version: "3"
+2 services:
+3   app:
+4     build: .
+5     ports:
+6       - "8000:8000"
+7     environment:
+8       - FASTAPI_HOST=0.0.0.0
+9       - FASTAPI_PORT=8000
+
+```
+
+================================== Ai Message ==================================
+
+Here is the Unix script that installs dependencies and runs the codebase:
+```
+#!/bin/bash
+
+# Install dependencies
+docker-compose build
+
+# Run the application
+docker-compose up -d
+```
